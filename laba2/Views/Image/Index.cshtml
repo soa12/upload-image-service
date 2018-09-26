@@ -1,0 +1,77 @@
+﻿@model PagedList.IPagedList<laba2.Models.Image>
+@using PagedList.Mvc;
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Изображения</h2>
+
+<p>
+    @Html.ActionLink("Добавить изображение", "Create")
+</p>
+
+@*@Html.Raw("<img class='img-responsive' src=\"data:image/jpeg;base64,"
+                                + Convert.ToBase64String(item.Data) + "\" />")*@
+<div class="row">
+    @foreach (var item in Model)
+    {
+    <div class="col-sm-6 col-md-4">
+        <div class="thumbnail">
+            <img data-src="holder.js/300x200" alt="...">
+            <div class="caption">
+                <h3>Ярлык эскиза</h3>
+                <p>...</p>
+                <p><a href="#" class="btn btn-primary" role="button">Кнопка</a> <a href="#" class="btn btn-default" role="button">Кнопка</a></p>
+            </div>
+        </div>
+    </div>
+    }
+</div>
+
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <a href='@Url.Action("GetServices", "Home", new { id = item.Id})'>
+            <div class="col-sm-6 col-md-4">
+                <div class="media services-wrap wow fadeInDown">
+                    <div class="pull-left">
+                        <img class="img-responsive" src="~/client/images/services/sewing/блузка.jpg">
+                    </div>
+                    <div class="media-body">
+                        <h3 class="media-heading">@item.Name</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    }
+</div><!--/.row-->
+@*<table>
+        <tr>
+            <th>Название</th>
+            <th>Изображение</th>
+
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name, new { htmlAttributes = new { @class = "form-control" } })
+                </td>
+                <td>
+                    @Html.Raw("<img style='width:120px; height:90px;' src=\"data:image/jpeg;base64,"
+                                                       + Convert.ToBase64String(item.Data) + "\" />")
+                </td>
+            </tr>
+        }
+
+    </table>*@
+<br />
+Страница @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) из @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index", new { page }))
+
+@Scripts.Render("~/scripts/jquery-1.10.2.js")
+@Scripts.Render("~/scripts/jquery.unobtrusive-ajax.js")
