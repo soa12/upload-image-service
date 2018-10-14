@@ -1,0 +1,55 @@
+﻿@using laba2.Models
+@model laba2.Models.Image
+
+<div class="container-fluid">
+    <div class="modal-content">
+        <div class="modal-header">
+
+            <div class="row">
+                <div class="col-xs-6 col-md-3">
+                    <img src=@Model.PathToPhoto alt="...">
+                    <p>
+                        <input type="button" onclick="Tolike()" value=@Model.Id data-item=@Model.Id />
+                        <a id='like' data-item='" + @Model.Id + "' onclick='ToLike(this);'><span class="glyphicon glyphicon-thumbs-up"></span></a>
+                        <a id='dislike' data-item='" + @Model.Id + "' onclick='ToDislike(this);'><span class="glyphicon glyphicon-thumbs-down"></a>
+                        @*<a href='@Url.Action("ToDislike", "Image", new { id = Model.Id})' class="btn btn-default" role="button">*@
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script type="text/javascript">
+        function ToDislike1(id) {
+
+            $.ajax({
+                url: '/api/values/' + id,
+                type: 'POST',
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    GetAllBooks();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        function ToDislike(el) {
+
+            // получаем id удаляемого объекта
+            var id = $(el).attr('data-item');
+            $.get("/Image/ToDislike/" + id);
+            //ToDislike(id);
+        }
+
+        function Tolike(el) {
+
+            // получаем id удаляемого объекта
+            var id = $(el).attr('data-item');
+            $.get("/Image/ToLike/" + id);
+            //ToDislike(id);
+        }
+    </script>
+    }

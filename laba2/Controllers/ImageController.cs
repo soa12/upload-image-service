@@ -8,6 +8,8 @@ using System.Web.Mvc;
 using PagedList;
 using PagedList.Mvc;
 using System.Data.Entity;
+using System.Web.Hosting;
+using System.Text.RegularExpressions;
 
 namespace laba2.Controllers
 {
@@ -17,15 +19,29 @@ namespace laba2.Controllers
         // GET: Image
         public ActionResult Index(int? page)
         {
-            int pageSize = 3;
+            int pageSize = 4;
             int pageNumber = (page ?? 1);
             return View(db.Images.ToList().ToPagedList(pageNumber, pageSize));
         }
 
-        // GET: Image/Details/5
-        public ActionResult Details(int id)
+        public FileContentResult GetImage(byte[] data)
         {
-            return View();
+            if (data != null)
+            {
+                var file = File(data, "jpg");
+                return file;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        // GET: Image/Details/5
+        public ActionResult Details(Guid id)
+        {
+
+            return PartialView(db.Images.Find(id));
         }
 
         // GET: Image/Create
@@ -40,25 +56,43 @@ namespace laba2.Controllers
         [HttpPost]
         public ActionResult Create(Image image, HttpPostedFileBase uploadImage)
         {
+            if (uploadImage != null)
+            {
+                // путь к папке Files
+                var id = Guid.NewGuid();
+        
+                Regex regex = new Regex(@"/(.*)");
+                Match match = regex.Match(uploadImage.ContentType);
+                string path = "/Content/Images/" + id.ToString() + "." + match.Groups[1].ToString();
+                uploadImage.SaveAs(Server.MapPath(path));
+                image.Id = id;
+                image.PathToPhoto = path;
+                db.Images.Add(image);
+                db.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
+
             //try
             //{
-                if (ModelState.IsValid && uploadImage != null)
-                {
-                    byte[] imageData = null;
-                    // считываем переданный файл в массив байтов
-                    using (var binaryReader = new BinaryReader(uploadImage.InputStream))
-                    {
-                        imageData = binaryReader.ReadBytes(uploadImage.ContentLength);
-                    }
-                    // установка массива байтов
-                    image.Data = imageData;
-                    image.Id = Guid.NewGuid();
-                    db.Images.Add(image);
-                    db.SaveChanges();
+            //if (ModelState.IsValid && uploadImage != null)
+            //{
+            //    byte[] imageData = null;
+            //    // считываем переданный файл в массив байтов
+            //    using (var binaryReader = new BinaryReader(uploadImage.InputStream))
+            //    {
+            //        imageData = binaryReader.ReadBytes(uploadImage.ContentLength);
+            //        binaryReader.BaseStream.Write(imageData, 0, imageData.Length);
+            //    }
+            //    // установка массива байтов
+            //    image.Data = imageData;
+            //    image.Id = Guid.NewGuid();
+            //    db.Images.Add(image);
+            //    db.SaveChanges();
 
-                    return RedirectToAction("Index");
-                }
-                return View(image);
+            //    return RedirectToAction("Index");
+            //}
+            //return View(image);
             //}
             //catch(Exception ex)
             //{
@@ -67,22 +101,24 @@ namespace laba2.Controllers
             //}
         }
 
-        [HttpPost]
-        public void ToLike(int id)
+        //[HttpPost]
+        public RedirectToRouteResult ToLike(Guid id)
         {
             Image image = db.Images.Find(id);
             image.Likes++;
             db.Entry(image).State = EntityState.Modified;
             db.SaveChanges();
+            return RedirectToAction("Index");
         }
 
-        [HttpPost]
-        public void ToDislike(int id)
+        //[HttpPost]
+        public RedirectToRouteResult ToDislike(Guid id)
         {
             Image image = db.Images.Find(id);
             image.Dislikes++;
             db.Entry(image).State = EntityState.Modified;
             db.SaveChanges();
+            return RedirectToAction("Index");
         }
 
         // GET: Image/Edit/5
